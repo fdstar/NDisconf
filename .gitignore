@@ -1,0 +1,5 @@
+/src/.vs
+/src/NDisconf.Core/obj
+/src/NDisconf.Core/bin
+/src/NDisconf.Client/obj
+/src/NDisconf.Client/bin

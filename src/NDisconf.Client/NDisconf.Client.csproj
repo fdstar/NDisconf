@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NDisconf.Core\NDisconf.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Rules\" />
+    <Folder Include="Fetchers\" />
+  </ItemGroup>
+
+</Project>
