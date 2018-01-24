@@ -36,11 +36,11 @@ namespace NDisconf.Core.Zookeepers
         /// <summary>
         /// 初始化watcher
         /// </summary>
-        /// <param name="connectstring">zk连接字符串</param>
+        /// <param name="connectionString">zk连接字符串</param>
         /// <param name="sessionTimeout">zk会话超时时间</param>
-        public ConnectWatcher(string connectstring, int sessionTimeout)
+        public ConnectWatcher(string connectionString, int sessionTimeout)
         {
-            this._connectionString = connectstring;
+            this._connectionString = connectionString;
             this._sessionTimeout = sessionTimeout;
         }
         /// <summary>
@@ -116,8 +116,8 @@ namespace NDisconf.Core.Zookeepers
         /// <param name="path">zk路径</param>
         /// <param name="data">节点数据</param>
         /// <param name="watch">节点是否需要监视，默认false</param>
-        /// <returns>如果创建了节点，则返回true</returns>
-        protected async Task<bool> CreateZnodeAsync(string path, byte[] data = null, bool watch = false)
+        /// <returns>如果创建了节点，则返回true，代表原先节点不存在，注意只要无异常，最终节点一定是存在的</returns>
+        public async Task<bool> CreateZnodeAsync(string path, byte[] data = null, bool watch = false)
         {
             var exists = await this._zooKeeper.existsAsync(path, watch).ConfigureAwait(false) == null;
             if (!exists)

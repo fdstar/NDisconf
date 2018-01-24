@@ -73,7 +73,10 @@ namespace NDisconf.Core.Zookeepers
                             configs.Add(builder.GetConfigNameByZnodeName(znode));
                         }
                     }
-                    notifyList.Add(new KeyValuePair<ConfigType, HashSet<string>>(builder.ConfigType, configs));
+                    if (configs.Count > 0)
+                    {
+                        notifyList.Add(new KeyValuePair<ConfigType, HashSet<string>>(builder.ConfigType, configs));
+                    }
                 }
                 if (isExpired && this.NodeChanged != null)
                 {
@@ -89,12 +92,7 @@ namespace NDisconf.Core.Zookeepers
             foreach (var path in this._dictionary.Keys)
             {
                 //补偿因ConnectionLossException导致的监控节点或添加临时节点失败
-                try
-                {
-                    this._dictionary.TryRemove(path, out object value);
-                    await AddWatcherAndAddUpdatedNode(path, this._lastMtime).ConfigureAwait(false);
-                }
-                catch { };
+                await AddWatcherAndAddUpdatedNode(path, this._lastMtime, true).ConfigureAwait(false);
             }
         }
 
@@ -119,14 +117,8 @@ namespace NDisconf.Core.Zookeepers
                         var configName = builder.GetConfigNameByZnodeName(znodeName);
                         if (configName != null)
                         {
-                            this._dictionary.TryRemove(path, out object value);
+                            await AddWatcherAndAddUpdatedNode(path, this._lastMtime).ConfigureAwait(false);
                             this.NodeChanged?.Invoke(builder.ConfigType, configName);
-                            //等待NodeChanged更新完后才继续监控
-                            try
-                            {
-                                await AddWatcherAndAddUpdatedNode(path, this._lastMtime).ConfigureAwait(false);
-                            }
-                            catch { };
                             break;
                         }
                     }
@@ -137,6 +129,7 @@ namespace NDisconf.Core.Zookeepers
         {
             try
             {
+                this._dictionary.TryRemove(path, out object value);
                 bool needNotify = true;
                 if (createIfNodeNotExists)
                 {
@@ -158,6 +151,7 @@ namespace NDisconf.Core.Zookeepers
             {
                 this._dictionary.TryAdd(path, null);
             }
+            catch { }
             return false;
         }
         private async Task AddTmpChildNode(string path)
