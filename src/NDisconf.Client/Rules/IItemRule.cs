@@ -8,9 +8,9 @@ namespace NDisconf.Client.Rules
     /// <summary>
     /// 键值对变更委托
     /// </summary>
-    /// <param name="configName"></param>
+    /// <param name="propName"></param>
     /// <param name="value"></param>
-    public delegate void ItemChanged(string configName, string value);
+    public delegate void ItemChanged(string propName, string value);
     /// <summary>
     /// 键值对更新规则
     /// </summary>
@@ -21,13 +21,13 @@ namespace NDisconf.Client.Rules
         /// </summary>
         /// <param name="action">键值对变更委托</param>
         /// <returns></returns>
-        IItemRule Changed(ItemChanged action);
+        IItemRule OnChanged(ItemChanged action);
         /// <summary>
         /// 注册Rule规则，设置默认的属性映射
         /// </summary>
         /// <param name="propName">要赋值的属性名，默认采用远程的configName</param>
         /// <returns></returns>
-        new IItemRule MapTo(string propName);
+        IItemRule MapTo(string propName);
         /// <summary>
         /// 更新指定实体的属性值，按默认方式获取实例属性，注意此处多次调用均会被执行
         /// </summary>

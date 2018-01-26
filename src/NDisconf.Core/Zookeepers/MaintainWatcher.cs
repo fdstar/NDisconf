@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using static org.apache.zookeeper.KeeperException;
 
 namespace NDisconf.Core.Zookeepers
 {
@@ -58,8 +59,24 @@ namespace NDisconf.Core.Zookeepers
                         {
                             if (_queue.TryPeek(out Func<Task> func))
                             {
-                                await func().ConfigureAwait(false);
-                                _queue.TryDequeue(out func);
+                                try
+                                {
+                                    await func().ConfigureAwait(false);
+                                    _queue.TryDequeue(out func);
+                                }
+                                catch (ConnectionLossException clEx)
+                                {
+                                    break;
+                                }
+                                catch (SessionExpiredException seEx)
+                                {
+                                    break;
+                                }
+                                catch
+                                {
+                                    //除了上面两种zk异常需要停止循环，其余异常均需移除委托
+                                    _queue.TryDequeue(out func);
+                                }
                             }
                         }
                     });

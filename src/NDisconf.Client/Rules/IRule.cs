@@ -10,11 +10,9 @@ namespace NDisconf.Client.Rules
     public interface IRule
     {
         /// <summary>
-        /// 注册Rule规则，设置默认的属性映射
+        /// 配置节点名称
         /// </summary>
-        /// <param name="configName">默认采用远程的configName</param>
-        /// <returns></returns>
-        IRule MapTo(string configName);
+        string ConfigName { get; }
         /// <summary>
         /// 当配置的值发生变化时，通知值变更
         /// </summary>
