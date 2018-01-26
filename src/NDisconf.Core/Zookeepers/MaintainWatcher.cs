@@ -37,15 +37,10 @@ namespace NDisconf.Core.Zookeepers
         {
             _queue.Enqueue(async () =>
             {
-                var stat = await this._zooKeeper.existsAsync(zkPath, false).ConfigureAwait(false);
-                if (stat != null)
+                if (!await this.CreateZnodeAsync(zkPath, data).ConfigureAwait(false))
                 {
                     await this.RemoveChildNode(zkPath).ConfigureAwait(false);//先删除子节点，再更新值保证不会出现客户端已经更新完并新增了节点，而服务端还没删完的情况
                     await this._zooKeeper.setDataAsync(zkPath, data, -1).ConfigureAwait(false);
-                }
-                else
-                {
-                    await this.CreateZnodeAsync(zkPath, data).ConfigureAwait(false);
                 }
             });
             StartJob();

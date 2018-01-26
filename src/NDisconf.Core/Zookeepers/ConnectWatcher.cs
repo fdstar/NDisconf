@@ -112,6 +112,7 @@ namespace NDisconf.Core.Zookeepers
         }
         /// <summary>
         /// 创建Ids.OPEN_ACL_UNSAFE以及CreateMode.PERSISTENT的节点
+        /// 如果创建了节点，则返回true，代表原先节点不存在，注意只要无异常，最终节点一定是存在的
         /// </summary>
         /// <param name="path">zk路径</param>
         /// <param name="data">节点数据</param>
