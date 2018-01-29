@@ -47,7 +47,13 @@ namespace NDisconf.Client.Rules
                 System.Configuration.ConfigurationManager.RefreshSection(this.SectionName);
             }
 #endif
-            this.Changed?.Invoke(this.ConfigName);
+            this.Changed?.Invoke(
+#if NETSTANDARD2_0
+                this.ConfigName
+#else
+                this.SectionName
+#endif
+                );
         }
 #if !NETSTANDARD2_0
         /// <summary>

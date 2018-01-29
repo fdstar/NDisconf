@@ -24,7 +24,7 @@ namespace NDisconf.Client.Rules
         /// <summary>
         /// 当前对应的配置节点名称
         /// </summary>
-        public string ConfigName { get; }
+        public string ConfigName { get; private set; }
         /// <summary>
         /// 当配置的值发生变化时，通知值变更
         /// </summary>
