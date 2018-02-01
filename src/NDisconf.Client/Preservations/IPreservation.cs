@@ -5,7 +5,7 @@ using System.Text;
 namespace NDisconf.Client.Preservations
 {
     /// <summary>
-    /// 配置本地持久化
+    /// 配置临时目录下的本地持久化
     /// </summary>
     public interface IPreservation
     {

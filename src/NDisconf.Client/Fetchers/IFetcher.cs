@@ -27,7 +27,7 @@ namespace NDisconf.Client.Fetchers
         /// 获取Zookeeper服务路径
         /// </summary>
         /// <returns></returns>
-        string GetZkHosts();
+        Task<string> GetZkHosts();
         /// <summary>
         /// 获取指定应用的最后一次更新时间
         /// </summary>

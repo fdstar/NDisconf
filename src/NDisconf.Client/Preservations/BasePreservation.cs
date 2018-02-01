@@ -7,7 +7,7 @@ using System.Text;
 namespace NDisconf.Client.Preservations
 {
     /// <summary>
-    /// 持久化抽象基础
+    /// 临时目录下的持久化抽象基础
     /// </summary>
     public abstract class BasePreservation : IPreservation
     {
