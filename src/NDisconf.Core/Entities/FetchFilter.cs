@@ -9,5 +9,9 @@ namespace NDisconf.Core.Entities
     /// </summary>
     public class FetchFilter : AppInfo
     {
+        /// <summary>
+        /// 客户端唯一标志
+        /// </summary>
+        public string ClientIdentity { get; set; }
     }
 }
