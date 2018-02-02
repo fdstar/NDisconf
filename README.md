@@ -5,7 +5,7 @@ disconf的NET版本，为与disconf.net区别，命名为NDisconf
 1、zk连接不再阻塞项目的启动（但从服务器数据抓取还是按配置确定是否会阻塞程序）  
 2、优化zk重连机制，增加ConnectionLossException时相关操作重试   
 3、支持net45+，netstandard2.0+  
-4、增加灰度发布概念（可能会增加，已有大致方案，暂时还没详细方案，但该方案必然依赖第5点计划）   
+4、增加灰度发布概念（可能会增加，已有大致方案，暂时还没详细方案，但该方案必然依赖第5点计划）  
 5、增加配置更新版本概念（可能会增加，已有大致方案，暂时还没详细方案）  
 6、重新开发web部分（该部分在disconf.net中非本人开发）  
 7、与disconf兼容，即不需要更新web，可以直接用ndisconf客户端连接disconf的web服务进行更新（但disconf.net的客户端不与ndisconf兼容，需修改连接代码）  
