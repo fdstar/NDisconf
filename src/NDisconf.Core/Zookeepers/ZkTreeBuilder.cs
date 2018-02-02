@@ -136,19 +136,7 @@ namespace NDisconf.Core.Zookeepers
         private string GetZnodeName(string configName)
         {
             var tmp = this.GetIgnoreCaseString(configName);
-            switch (this._hashAlgorithm)
-            {
-                case "MD5":
-                    return MD5Helper.HashOf(tmp);
-                case "SHA256":
-                    return SHA256Helper.HashOf(tmp);
-                case "SHA384":
-                    return SHA384Helper.HashOf(tmp);
-                case "SHA512":
-                    return SHA512Helper.HashOf(tmp);
-                default:
-                    return SHA1Helper.HashOf(tmp);
-            }
+            return HashSignatureHelper.SignData(tmp, this._hashAlgorithm);
         }
         #endregion
     }

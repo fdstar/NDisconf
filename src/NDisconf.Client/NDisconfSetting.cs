@@ -10,7 +10,7 @@ namespace NDisconf.Client
     /// <summary>
     /// NDisconf客户端配置
     /// </summary>
-    public class ClientSetting
+    public class NDisconfSetting
     {
         /// <summary>
         /// Rest服务器域名地址
@@ -51,22 +51,25 @@ namespace NDisconf.Client
     public class ClientInfoSetting
     {
         /// <summary>
-        /// 客户端程序名称，注意大小写要与服务端一致
+        /// 客户端程序名称，如果IgnoreCase为false注意大小写要与服务端一致
         /// </summary>
         public string AppName { get; set; }
         /// <summary>
-        /// 当前客户端程序所处环境，注意大小写要与服务端一致
+        /// 当前客户端程序所处环境，如果IgnoreCase为false注意大小写要与服务端一致
         /// </summary>
         public string Environment { get; set; }
         /// <summary>
-        /// 当前客户端程序版本，注意大小写要与服务端一致
+        /// 当前客户端程序版本，如果IgnoreCase为false注意大小写要与服务端一致
         /// </summary>
         public string Version { get; set; }
         /// <summary>
         /// 客户端标识，用于服务端查看已更新客户端，如果不设置则默认获取客户端电脑名称
         /// </summary>
         public string ClientIdentity { get; set; } = System.Environment.MachineName;
-
+        /// <summary>
+        /// 该配置节下所有的配置是否忽略大小写，默认不忽略
+        /// </summary>
+        public bool IgnoreCase { get; set; } = false;
     }
     /// <summary>
     /// 请求安全配置
