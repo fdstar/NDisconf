@@ -12,14 +12,18 @@ namespace NDisconf.Client.Preservations
     /// </summary>
     public class ItemPreservation : BasePreservation
     {
-        //public ItemPreservation(Preservation preservation)
-        //    : base(preservation)
-        //{
-        //}
+        /// <summary>
+        /// 键值对配置的本地持久化
+        /// </summary>
+        /// <param name="setting"></param>
+        public ItemPreservation(PreservationSetting setting)
+            : base(setting)
+        {
+        }
         /// <summary>
         ///  用于持久化相关的文件路劲，如果不存在，则需返回null
         /// </summary>
-        public override string FilePath => ""/*this.GetFullPath(this._preservation.TmpItemsLocalName, this._tmpRootPath)*/;
+        public override string FilePath => this.GetFullPath(this._setting.TmpItemsLocalName, this._tmpRootPath);
         /// <summary>
         /// 从本地获取映射内容
         /// </summary>

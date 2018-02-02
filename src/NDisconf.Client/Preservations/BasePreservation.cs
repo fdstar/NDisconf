@@ -7,15 +7,31 @@ using System.Text;
 namespace NDisconf.Client.Preservations
 {
     /// <summary>
-    /// 临时目录下的持久化抽象基础
+    /// 配置持久化抽象基础
     /// </summary>
     public abstract class BasePreservation : IPreservation
     {
+        /// <summary>
+        /// 本地持久化配置
+        /// </summary>
+        protected readonly PreservationSetting _setting;
+        /// <summary>
+        /// 临时目录
+        /// </summary>
         protected readonly string _tmpRootPath;
+        /// <summary>
+        /// 实际目录
+        /// </summary>
         protected readonly string _factRootPath;
-        public BasePreservation()
+        /// <summary>
+        /// 配置持久化构造函数
+        /// </summary>
+        /// <param name="setting"></param>
+        public BasePreservation(PreservationSetting setting)
         {
-            //TODO: 持久化相关配置读取
+            this._setting = setting;
+            this._tmpRootPath = this.GetPhysicalPath(this._setting.TmpRootDirectory);
+            this._factRootPath = this.GetPhysicalPath(this._setting.FactRootDirectory);
             DirectoryHelper.CreateDirectories(this._tmpRootPath, this._factRootPath);
         }
         /// <summary>
@@ -67,10 +83,10 @@ namespace NDisconf.Client.Preservations
         protected string GetPhysicalPath(string path)
         {
             var physicalPath = path;
-            //if (!this._preservation.AbsolutePath)
-            //{
-            //    physicalPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
-            //}
+            if (!this._setting.AbsolutePath)
+            {
+                physicalPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
+            }
             return physicalPath;
         }
         /// <summary>

@@ -7,18 +7,22 @@ using System.Text;
 namespace NDisconf.Client.Preservations
 {
     /// <summary>
-    /// 临时目录下的文件持久化方案
+    /// 文件持久化方案
     /// </summary>
     public class FilePreservation : BasePreservation
     {
-        //public FilePreservation(Preservation preservation)
-        //    : base(preservation)
-        //{
-        //}
+        /// <summary>
+        /// 配置文件持久化构造函数
+        /// </summary>
+        /// <param name="setting"></param>
+        public FilePreservation(PreservationSetting setting)
+            : base(setting)
+        {
+        }
         /// <summary>
         /// 用于持久化相关的文件路劲，如果不存在，则需返回null
         /// </summary>
-        public override string FilePath => null /*this.GetFullPath(this._preservation.TmpFilesLocalName, this._tmpRootPath)*/;
+        public override string FilePath => this.GetFullPath(this._setting.TmpFilesLocalName, this._tmpRootPath);
         /// <summary>
         /// 从本地获取映射内容
         /// </summary>
@@ -65,11 +69,11 @@ namespace NDisconf.Client.Preservations
                 {
                     this.SaveAndCopy(kv.Key, kv.Value, false);
                 }
-                //var filePath = this.GetFullPath(this._preservation.TmpFilesLocalName, this._tmpRootPath, true);
-                //if (filePath != null)
-                //{
-                //    File.WriteAllText(filePath, string.Join(",", source.Keys), Encoding.UTF8);
-                //}
+                var filePath = this.GetFullPath(this._setting.TmpFilesLocalName, this._tmpRootPath, true);
+                if (filePath != null)
+                {
+                    File.WriteAllText(filePath, string.Join(",", source.Keys), Encoding.UTF8);
+                }
             }
         }
     }
