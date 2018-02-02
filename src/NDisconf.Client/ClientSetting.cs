@@ -37,9 +37,13 @@ namespace NDisconf.Client
         /// </summary>
         public PreservationSetting Preservation { get; set; }
         /// <summary>
+        /// 请求安全配置
+        /// </summary>
+        public SecuritySetting Security { get; set; }
+        /// <summary>
         /// 与服务端进行通讯的具体实现类
         /// </summary>
-        public string FetcherType { get; set; } = "NDisconf.Client.Fetchers.NDisFetcher, NDisconf.Client";
+        public string FetcherType { get; set; } = "NDisconf.Client.Fetchers.NDisconfFetcher, NDisconf.Client";
     }
     /// <summary>
     /// 客户端信息
@@ -62,6 +66,21 @@ namespace NDisconf.Client
         /// 客户端标识，用于服务端查看已更新客户端，如果不设置则默认获取客户端电脑名称
         /// </summary>
         public string ClientIdentity { get; set; } = System.Environment.MachineName;
+
+    }
+    /// <summary>
+    /// 请求安全配置
+    /// </summary>
+    public class SecuritySetting
+    {
+        /// <summary>
+        /// 请求用的秘钥，默认为空，表示向服务端请求数据时不进行签名
+        /// </summary>
+        public string SecretKey { get; set; }
+        /// <summary>
+        /// 签名用的Hash算法
+        /// </summary>
+        public string HashAlgorithm { get; set; } = "MD5";
     }
     /// <summary>
     /// 更新策略配置

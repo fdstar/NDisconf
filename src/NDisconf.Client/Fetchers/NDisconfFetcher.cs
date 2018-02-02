@@ -9,7 +9,7 @@ namespace NDisconf.Client.Fetchers
     /// <summary>
     /// NDisconf下的Fetcher实现类
     /// </summary>
-    public class NDisFetcher : IFetcher
+    public class NDisconfFetcher : IFetcher
     {
         /// <summary>
         /// 批量获取所有的配置信息
