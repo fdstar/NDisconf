@@ -8,7 +8,7 @@ namespace NDisconf.Core.Entities
     /// <summary>
     /// 应用信息
     /// </summary>
-    public class AppInfo
+    public class AppInfo : SignatureData
     {
         private string _appName;
         private string _version;
@@ -54,6 +54,15 @@ namespace NDisconf.Core.Entities
                 value = Regex.Replace(inputStr, pattern, string.Empty);
             }
             return value;
+        }
+
+        public override SortedDictionary<string, string> GetSortedDictionary()
+        {
+            var dic =  base.GetSortedDictionary();
+            dic.Add("AppName", this.AppName);
+            dic.Add("Environment", this.Environment);
+            dic.Add("Version", this.Version);
+            return dic;
         }
     }
 }

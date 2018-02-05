@@ -17,5 +17,13 @@ namespace NDisconf.Core.Entities
         /// 类型
         /// </summary>
         public ConfigType ConfigType { get; set; }
+
+        public override SortedDictionary<string, string> GetSortedDictionary()
+        {
+            var dic = base.GetSortedDictionary();
+            dic.Add("ConfigName", this.ConfigName);
+            dic.Add("ConfigType", ((int)this.ConfigType).ToString());
+            return dic;
+        }
     }
 }

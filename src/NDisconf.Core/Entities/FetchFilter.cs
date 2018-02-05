@@ -13,5 +13,11 @@ namespace NDisconf.Core.Entities
         /// 客户端唯一标志
         /// </summary>
         public string ClientIdentity { get; set; }
+        public override SortedDictionary<string, string> GetSortedDictionary()
+        {
+            var dic =  base.GetSortedDictionary();
+            dic.Add("ClientIdentity", this.ClientIdentity);
+            return dic;
+        }
     }
 }

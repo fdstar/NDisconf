@@ -67,14 +67,15 @@ namespace NDisconf.Client.Fetchers
         /// <summary>
         /// 获取Zookeeper服务路径
         /// </summary>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        public Task<string> GetZkHosts()
+        public Task<string> GetZkHosts(SignatureData filter)
         {
             return this.CallApi<string>(GetZkHostsResource, async r =>
             {
                 var response = await this._client.ExecuteTaskAsync(r).ConfigureAwait(false);
                 return response.Content;
-            });
+            }, filter);
         }
     }
 }

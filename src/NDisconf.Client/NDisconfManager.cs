@@ -197,7 +197,11 @@ namespace NDisconf.Client
         }
         private async Task AddWatcher(params IZkTreeBuilder[] builders)
         {
-            var zkHost = await this._fetcher.GetZkHosts().ConfigureAwait(false);
+            var zkHost = await this._fetcher.GetZkHosts(new SignatureData
+            {
+                SecretKey = this._setting.Security.SecretKey,
+                HashAlgorithm = this._setting.Security.HashAlgorithm
+            }).ConfigureAwait(false);
             this._watcher = new NodeWatcher(zkHost, this._setting.ZookeeperSessionTimeout, this._setting.ClientInfo.ClientIdentity, builders);
             this._watcher.NodeChanged += Watcher_NodeChanged;
             this._watcher.StartConnect();
@@ -244,7 +248,9 @@ namespace NDisconf.Client
                 AppName = info.AppName,
                 Version = info.Version,
                 Environment = info.Environment,
-                ClientIdentity = info.ClientIdentity
+                ClientIdentity = info.ClientIdentity,
+                SecretKey = this._setting.Security.SecretKey,
+                HashAlgorithm = this._setting.Security.HashAlgorithm
             };
         }
     }
