@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using NDisconf.Core.Entities;
 
 namespace NDisconf.Client.Preservations
 {
@@ -24,6 +25,11 @@ namespace NDisconf.Client.Preservations
         ///  用于持久化相关的文件路劲，如果不存在，则需返回null
         /// </summary>
         public override string FilePath => this.GetFullPath(this._setting.TmpItemsLocalName, this._tmpRootPath);
+        /// <summary>
+        /// 当前持久化对应的配置类型
+        /// </summary>
+        public override ConfigType ConfigType => ConfigType.Item;
+
         /// <summary>
         /// 从本地获取映射内容
         /// </summary>

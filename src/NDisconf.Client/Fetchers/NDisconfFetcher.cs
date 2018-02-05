@@ -32,7 +32,11 @@ namespace NDisconf.Client.Fetchers
         /// <returns></returns>
         public Task<IDictionary<ConfigType, IDictionary<string, string>>> GetAllConfigs(FetchFilter filter)
         {
-            throw new NotImplementedException();
+            return this.CallApi(GetAllConfigsResource, async r =>
+            {
+                var response = await this._client.ExecuteTaskAsync<IDictionary<ConfigType, IDictionary<string, string>>>(r).ConfigureAwait(false);
+                return response.Data;
+            });
         }
         /// <summary>
         /// 根据键值获取对应的配置内容
@@ -41,7 +45,11 @@ namespace NDisconf.Client.Fetchers
         /// <returns></returns>
         public Task<string> GetConfig(ConfigFetchFilter filter)
         {
-            throw new NotImplementedException();
+            return this.CallApi<string>(GetConfigResource, async r =>
+            {
+                var response = await this._client.ExecuteTaskAsync(r).ConfigureAwait(false);
+                return response.Content;
+            });
         }
         /// <summary>
         /// 获取指定应用的最后一次更新时间
@@ -62,13 +70,11 @@ namespace NDisconf.Client.Fetchers
         /// <returns></returns>
         public Task<string> GetZkHosts()
         {
-            throw new NotImplementedException();
-        }
-        private async Task<T> CallApi<T>(string resource, Func<RestRequest, Task<T>> func, object param = null)
-        {
-            RestRequest request = new RestRequest(resource, Method.POST);
-            request.AddJsonBody(param);
-            return await this._policy.Execute(() => func(request)).ConfigureAwait(false);
+            return this.CallApi<string>(GetZkHostsResource, async r =>
+            {
+                var response = await this._client.ExecuteTaskAsync(r).ConfigureAwait(false);
+                return response.Content;
+            });
         }
     }
 }

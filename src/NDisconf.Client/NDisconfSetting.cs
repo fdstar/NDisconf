@@ -98,10 +98,10 @@ namespace NDisconf.Client
         /// 要忽略更新的键值对配置，以,分割，注意大小写要与服务端一致
         /// </summary>
         public string ItemIgnores { get; set; }
-        /// <summary>
-        /// 启动时是否同步加载，默认同步
-        /// </summary>
-        public bool StartedSync { get; set; } = true;
+        ///// <summary>
+        ///// 启动时是否同步加载，默认同步
+        ///// </summary>
+        //public bool StartedSync { get; set; } = true;
         /// <summary>
         /// 当获取失败时的重试次数，默认为3
         /// </summary>

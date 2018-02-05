@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NDisconf.Core.Entities;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,6 +10,10 @@ namespace NDisconf.Client.Preservations
     /// </summary>
     public interface IPreservation
     {
+        /// <summary>
+        /// 当前持久化对应的配置类型
+        /// </summary>
+        ConfigType ConfigType { get; }
         /// <summary>
         /// 用于持久化相关的文件路劲，如果不存在，则需返回null
         /// </summary>

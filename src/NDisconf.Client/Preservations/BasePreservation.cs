@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using NDisconf.Core.Entities;
 
 namespace NDisconf.Client.Preservations
 {
@@ -34,6 +35,10 @@ namespace NDisconf.Client.Preservations
             this._factRootPath = this.GetPhysicalPath(this._setting.FactRootDirectory);
             DirectoryHelper.CreateDirectories(this._tmpRootPath, this._factRootPath);
         }
+        /// <summary>
+        /// 当前持久化对应的配置类型
+        /// </summary>
+        public abstract ConfigType ConfigType { get; }
         /// <summary>
         /// 用于持久化相关的文件路劲，如果不存在，则需返回null
         /// </summary>

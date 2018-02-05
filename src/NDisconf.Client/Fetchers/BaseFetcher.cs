@@ -3,6 +3,7 @@ using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace NDisconf.Client.Fetchers
 {
@@ -36,6 +37,20 @@ namespace NDisconf.Client.Fetchers
                 //TODO:log
             });
             this._client = new RestClient(this._setting.WebApiHost);
+        }
+        /// <summary>
+        /// 向服务端发起http请求，并返回响应的响应
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="resource"></param>
+        /// <param name="func"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        protected virtual async Task<T> CallApi<T>(string resource, Func<RestRequest, Task<T>> func, object param = null)
+        {
+            RestRequest request = new RestRequest(resource, Method.POST);
+            request.AddJsonBody(param);
+            return await this._policy.Execute(() => func(request)).ConfigureAwait(false);
         }
     }
 }
