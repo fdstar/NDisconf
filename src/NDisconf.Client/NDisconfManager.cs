@@ -86,10 +86,13 @@ namespace NDisconf.Client
                 new FilePreservation(this._setting.Preservation),
                 new ItemPreservation(this._setting.Preservation)
             };
-            await this._fallBackPolicy.ExecuteAsync(async () =>
+            if (this._setting.EnableRemote)
             {
-                await RecoverAllConfigs();
-            });
+                await this._fallBackPolicy.ExecuteAsync(async () =>
+                {
+                    await RecoverAllConfigs().ConfigureAwait(false);
+                }).ConfigureAwait(false);
+            }
         }
         private NDisconfSetting GetSetting(string path)
         {
@@ -109,9 +112,8 @@ namespace NDisconf.Client
         }
         private async Task RecoverAllConfigs()
         {
-            var zkHost = await this._fetcher.GetZkHosts();
             var filter = this.GetFilter<FetchFilter>();
-            var ltimeFromServer = await this._fetcher.GetLastChangedTime(filter);
+            var ltimeFromServer = await this._fetcher.GetLastChangedTime(filter).ConfigureAwait(false);
             IDictionary<ConfigType, IDictionary<string, string>> configs;
             if (this.NeedDownload(ltimeFromServer))
             {
@@ -119,7 +121,7 @@ namespace NDisconf.Client
             }
             else
             {
-                configs = await this.GetConfigsFromServer(filter);
+                configs = await this.GetConfigsFromServer(filter, ltimeFromServer).ConfigureAwait(false);
             }
             //移除要忽略的选项
             this.RemoveIgnores(new Dictionary<ConfigType, IEnumerable<string>>
@@ -127,7 +129,7 @@ namespace NDisconf.Client
                 { ConfigType.File,this._setting.UpdateStrategy.FileIgnoreList},
                 { ConfigType.Item,this._setting.UpdateStrategy.ItemIgnoreList},
             }, configs);
-            this.Refresh(configs);
+            await this.Refresh(filter, configs);
         }
         private bool NeedDownload(DateTime ltimeFromServer)
         {
@@ -138,15 +140,20 @@ namespace NDisconf.Client
             var ltimeFromLocal = this._preservations.Max(p => p.LastWriteTime);
             return ltimeFromLocal > DateTime.Now || ltimeFromLocal < ltimeFromServer;
         }
-        private async Task<IDictionary<ConfigType, IDictionary<string, string>>> GetConfigsFromServer(FetchFilter filter)
+        private async Task<IDictionary<ConfigType, IDictionary<string, string>>> GetConfigsFromServer(FetchFilter filter, DateTime ltimeFromServer)
         {
-            var configs = await this._fetcher.GetAllConfigs(filter);
+            var configs = await this._fetcher.GetAllConfigs(filter).ConfigureAwait(false);
             if (configs != null && configs.Count > 0)
             {
                 //本地持久化
                 foreach (var kv in configs)
                 {
-                    this._preservations.FirstOrDefault(p => p.ConfigType == kv.Key)?.WriteAll(kv.Value);
+                    var pre = this._preservations.FirstOrDefault(p => p.ConfigType == kv.Key);
+                    if (pre != null)
+                    {
+                        pre.WriteAll(kv.Value);
+                        pre.LastWriteTime = ltimeFromServer;
+                    }
                 }
             }
             return configs;
@@ -166,9 +173,68 @@ namespace NDisconf.Client
                 }
             }
         }
-        private void Refresh(IDictionary<ConfigType, IDictionary<string, string>> configs)
+        private async Task Refresh(AppInfo info, IDictionary<ConfigType, IDictionary<string, string>> configs)
         {
+            var builders = configs.Select(c =>
+            {
+                var builder = new ZkTreeBuilder(info, c.Key, this._setting.ZookeeperBasePath, this._setting.ClientInfo.IgnoreCase);
+                var needRegister = c.Key == ConfigType.File;
+                foreach (var kv in c.Value)
+                {
+                    builder.GetOrAddZnodeName(kv.Key);
+                    if (needRegister)
+                    {
+                        this.FileRules.For(kv.Key);
+                    }
+                    this._fallBackPolicy.Execute(() =>
+                    {
+                        this.TryNoticeChanged(c.Key, kv.Key, kv.Value);
+                    });
+                }
+                return builder;
+            }).ToArray();
+            await this.AddWatcher(builders).ConfigureAwait(false);
         }
+        private async Task AddWatcher(params IZkTreeBuilder[] builders)
+        {
+            var zkHost = await this._fetcher.GetZkHosts().ConfigureAwait(false);
+            this._watcher = new NodeWatcher(zkHost, this._setting.ZookeeperSessionTimeout, this._setting.ClientInfo.ClientIdentity, builders);
+            this._watcher.NodeChanged += Watcher_NodeChanged;
+            this._watcher.StartConnect();
+        }
+
+        private void Watcher_NodeChanged(ConfigType configType, string configName)
+        {
+            this._fallBackPolicy.Execute(async () =>
+            {
+                var filter = this.GetFilter<ConfigFetchFilter>();
+                filter.ConfigType = configType;
+                filter.ConfigName = configName;
+                var content = await this._fetcher.GetConfig(filter).ConfigureAwait(false);
+                var pre = this._preservations.FirstOrDefault(p => p.ConfigType == configType);
+                if (pre != null)
+                {
+                    pre.Save(configName, content);
+                    pre.LastWriteTime = await this._fetcher.GetLastChangedTime(filter).ConfigureAwait(false);
+                }
+                this.TryNoticeChanged(configType, configName, content);
+            });
+        }
+        private void TryNoticeChanged(ConfigType configType, string configName, string content)
+        {
+            RuleCollection collection = null;
+            switch (configType)
+            {
+                case ConfigType.File:
+                    collection = this.FileRules;
+                    break;
+                case ConfigType.Item:
+                    collection = this.ItemRules;
+                    break;
+            };
+            collection?.TryNoticeChanged(configName, content);
+        }
+
         private T GetFilter<T>()
             where T : FetchFilter, new()
         {

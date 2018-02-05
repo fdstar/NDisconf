@@ -6,10 +6,22 @@ using System.Text;
 namespace NDisconf.Client.Rules
 {
     /// <summary>
+    /// Rule集合抽象类
+    /// </summary>
+    public abstract class RuleCollection
+    {
+        /// <summary>
+        /// 尝试按规则进行变更通知
+        /// </summary>
+        /// <param name="configName"></param>
+        /// <param name="changedValue"></param>
+        public abstract void TryNoticeChanged(string configName, string changedValue);
+    }
+    /// <summary>
     /// Rule集合，简化Rule入口
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RuleCollection<T>
+    public class RuleCollection<T> : RuleCollection
         where T : Rule
     {
         private ConcurrentDictionary<string, T> _rules = new ConcurrentDictionary<string, T>();
@@ -36,7 +48,7 @@ namespace NDisconf.Client.Rules
         /// </summary>
         /// <param name="configName"></param>
         /// <param name="changedValue"></param>
-        public void TryNoticeChanged(string configName, string changedValue)
+        public override void TryNoticeChanged(string configName, string changedValue)
         {
             if (this._rules.TryGetValue(configName, out T rule))
             {

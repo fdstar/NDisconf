@@ -21,6 +21,10 @@ namespace NDisconf.Client
         /// </summary>
         public string ZookeeperBasePath { get; set; } = string.Empty;
         /// <summary>
+        /// zookeeper的会话超时时间，单位毫秒，默认30000
+        /// </summary>
+        public int ZookeeperSessionTimeout { get; set; } = 30000;
+        /// <summary>
         /// 是否启用远程配置，默认true，设为false的话表示不从远程服务器下载配置
         /// </summary>
         public bool EnableRemote { get; set; } = true;
