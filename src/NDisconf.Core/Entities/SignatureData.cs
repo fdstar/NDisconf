@@ -11,10 +11,7 @@ namespace NDisconf.Core.Entities
     /// </summary>
     public class SignatureData
     {
-        /// <summary>
-        /// 请求用的秘钥，默认为空，表示向服务端请求数据时不进行签名
-        /// </summary>
-        public string SecretKey { get; set; } = string.Empty;
+        private string _secretKey;
         /// <summary>
         /// 签名用的Hash算法
         /// </summary>
@@ -26,7 +23,7 @@ namespace NDisconf.Core.Entities
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(this.SecretKey))
+                if (string.IsNullOrWhiteSpace(this._secretKey))
                 {//如果秘钥为空，则不进行签名
                     return "";
                 }
@@ -43,9 +40,26 @@ namespace NDisconf.Core.Entities
                 {
                     tmp = tmp.Remove(0, 1);
                 }
-                tmp.Append(this.SecretKey);
+                tmp.Append(this._secretKey);
                 return HashSignatureHelper.SignData(tmp.ToString(), this.HashAlgorithm);
             }
+        }
+        /// <summary>
+        /// 设置请求用的秘钥，默认为空，表示向服务端请求数据时不进行签名
+        /// </summary>
+        /// <param name="secretKey"></param>
+        public void SetSecretKey(string secretKey)
+        {
+            this._secretKey = secretKey;
+        }
+        /// <summary>
+        /// 校验签名是否一致
+        /// </summary>
+        /// <param name="compareData"></param>
+        /// <returns></returns>
+        public bool VerifyData(string compareData)
+        {
+            return compareData == this.SignData;
         }
         /// <summary>
         /// 获取签名用的字典
