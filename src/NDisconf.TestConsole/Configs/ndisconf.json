@@ -1,0 +1,32 @@
+﻿{
+  "WebApiHost": "http://127.0.0.1:8088/",
+  "ZookeeperBasePath": "",
+  "ZookeeperSessionTimeout": 30000,
+  "EnableRemote": true,
+  "FetcherType": "NDisconf.Client.Fetchers.NDisconfFetcher, NDisconf.Client",
+  "ClientInfo": {
+    "AppName": "TestConsole",
+    "Environment": "DEV",
+    "Version": "1.0.0.0",
+    "ClientName": "PC_001",
+    "IgnoreCase": false
+  },
+  "Security": {
+    "SecretKey": "",
+    "HashAlgorithm": "MD5"
+  },
+  "UpdateStrategy": {
+    "FileIgnores": null,
+    "ItemIgnores": null,
+    "RetryTimes": 3,
+    "RetryIntervalSeconds": 10,
+    "ForcedDownload": false
+  },
+  "Preservation": {
+    "AbsolutePath": false,
+    "TmpRootDirectory": "Tmp/Download/Configs",
+    "FactRootDirectory": "Configs",
+    "TmpItemsLocalName": "~items",
+    "TmpFilesLocalName": "~files"
+  }
+}

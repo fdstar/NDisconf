@@ -1,4 +1,5 @@
-﻿using Polly;
+﻿using NLog;
+using Polly;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace NDisconf.Client.Fetchers
         /// http请求客户端
         /// </summary>
         protected RestClient _client;
+        private static readonly Logger _logger = LogManager.GetLogger(NDisconfManager.LOGPREFIX + "Fetcher");
         /// <summary>
         /// 初始化
         /// </summary>
@@ -32,9 +34,9 @@ namespace NDisconf.Client.Fetchers
         {
             this._setting = setting;
             var strategy = this._setting.UpdateStrategy;
-            this._policy = Policy.Handle<Exception>().WaitAndRetry(strategy.RetryTimes, i => TimeSpan.FromSeconds(strategy.RetryIntervalSeconds), (e, t) =>
+            this._policy = Policy.Handle<Exception>().WaitAndRetry(strategy.RetryTimes, i => TimeSpan.FromSeconds(strategy.RetryIntervalSeconds), (e, t, c) =>
             {
-                //TODO:log
+                _logger.Error(e, "Request Resource: " + c["Resource"]);
             });
             this._client = new RestClient(this._setting.WebApiHost);
         }
@@ -50,7 +52,10 @@ namespace NDisconf.Client.Fetchers
         {
             RestRequest request = new RestRequest(resource, Method.POST);
             request.AddJsonBody(param);
-            return await this._policy.Execute(() => func(request)).ConfigureAwait(false);
+            return await this._policy.Execute(() => func(request), new Dictionary<string, object>
+            {
+                { "Resource",resource }
+            }).ConfigureAwait(false);
         }
     }
 }

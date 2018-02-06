@@ -3,3 +3,5 @@
 /src/NDisconf.Core/bin
 /src/NDisconf.Client/obj
 /src/NDisconf.Client/bin
+/src/NDisconf.TestConsole/bin
+/src/NDisconf.TestConsole/obj

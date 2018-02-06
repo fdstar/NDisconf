@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -10,6 +11,7 @@ namespace NDisconf.Client.Rules
     /// </summary>
     public class ItemRule : Rule, IItemRule
     {
+        private static readonly Logger _logger = LogManager.GetLogger(NDisconfManager.LOGPREFIX + "ItemRule");
         private List<PropertyMap> _list = new List<PropertyMap>();
         /// <summary>
         /// 默认要映射的属性名
@@ -65,7 +67,7 @@ namespace NDisconf.Client.Rules
                                 {
                                     //默认规则无法转换，则该项配置无效，直接移除
                                     this._list.RemoveAt(i);
-                                    //log
+                                    _logger.Info(string.Format("Key '{0}' has removed '{1}:{2}' because there has no effective convert method", this.ConfigName, map.EntityType.FullName, map.PropertyName));
                                     continue;
                                 }
                                 value = ConvertTo(changedValue, pType);
@@ -75,7 +77,7 @@ namespace NDisconf.Client.Rules
                     }
                     catch (Exception ex)
                     {
-                        //_log.Error($"Item '{map.EntityType.FullName}:{map.PropertyName}' set value '{changedValue}' error", ex);
+                        _logger.Error(ex, string.Format("Item '{0}:{1}' set value '{2}' error", map.EntityType.FullName, map.PropertyName, changedValue));
                     }
                 }
             }

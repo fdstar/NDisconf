@@ -9,6 +9,7 @@ using NDisconf.Core.Entities;
 using NDisconf.Client.Preservations;
 using System.Linq;
 using NDisconf.Client.Rules;
+using NLog;
 #if NETSTANDARD2_0
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,12 +26,13 @@ namespace NDisconf.Client
         /// <summary>
         /// NDisconf的日志前缀
         /// </summary>
-        public const string LOGPREFIX = "NDisconfLog";
+        public const string LOGPREFIX = "NDisconfLog_";
         private NDisconfSetting _setting;
         private Policy _fallBackPolicy;
         private NodeWatcher _watcher;
         private IFetcher _fetcher;
         private IPreservation[] _preservations;
+        private static readonly Logger _logger = LogManager.GetLogger(LOGPREFIX + "NDisconfManager");
         /// <summary>
         /// 单例
         /// </summary>
@@ -45,9 +47,19 @@ namespace NDisconf.Client
         public readonly RuleCollection<ItemRule> ItemRules = new RuleCollection<ItemRule>(c => new ItemRule(c));
         private NDisconfManager()
         {
-            _fallBackPolicy = Policy.Handle<Exception>().Fallback(() => { }, e =>
+            _fallBackPolicy = Policy.Handle<Exception>().Fallback((c, ct) => { }, (e, c) =>
             {
-                //TODO:log
+                StringBuilder tmp = new StringBuilder();
+                if (c.Keys.Count > 0)
+                {
+                    tmp.AppendLine("Exception params:");
+                    foreach (var key in c.Keys)
+                    {
+                        tmp.Append(key.PadRight(30));
+                        tmp.AppendLine(c[key].ToString());
+                    }
+                }
+                _logger.Error(e, tmp.ToString());
             });
         }
 #if NETSTANDARD2_0
@@ -91,6 +103,9 @@ namespace NDisconf.Client
                 await this._fallBackPolicy.ExecuteAsync(async () =>
                 {
                     await RecoverAllConfigs().ConfigureAwait(false);
+                }, new Dictionary<string, object>
+                {
+                    { "Action","RecoverAllConfigs"},
                 }).ConfigureAwait(false);
             }
         }
@@ -189,6 +204,11 @@ namespace NDisconf.Client
                     this._fallBackPolicy.Execute(() =>
                     {
                         this.TryNoticeChanged(c.Key, kv.Key, kv.Value);
+                    }, new Dictionary<string, object>
+                    {
+                        { "Action","TryNoticeChangedOnRefresh"},
+                        { "ConfigType",c.Key},
+                        { kv.Key,kv.Value}
                     });
                 }
                 return builder;
@@ -223,6 +243,11 @@ namespace NDisconf.Client
                     pre.LastWriteTime = await this._fetcher.GetLastChangedTime(filter).ConfigureAwait(false);
                 }
                 this.TryNoticeChanged(configType, configName, content);
+            }, new Dictionary<string, object>
+            {
+                { "Action","Watcher_NodeChanged"},
+                { "ConfigType",configType},
+                { "ConfigName",configName}
             });
         }
         private void TryNoticeChanged(ConfigType configType, string configName, string content)
