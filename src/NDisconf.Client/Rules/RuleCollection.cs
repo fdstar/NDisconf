@@ -18,10 +18,30 @@ namespace NDisconf.Client.Rules
         public abstract void TryNoticeChanged(string configName, string changedValue);
     }
     /// <summary>
+    /// Rule集合接口定义
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IRuleCollection<out T>
+        where T : Rule
+    {
+        /// <summary>
+        /// 根据configName获取对应的Rule对象
+        /// </summary>
+        /// <param name="configName">注意configName区分大小写</param>
+        /// <returns></returns>
+        T For(string configName);
+        /// <summary>
+        /// 尝试按规则进行变更通知
+        /// </summary>
+        /// <param name="configName"></param>
+        /// <param name="changedValue"></param>
+        void TryNoticeChanged(string configName, string changedValue);
+    }
+    /// <summary>
     /// Rule集合，简化Rule入口
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RuleCollection<T> : RuleCollection
+    public class RuleCollection<T> : RuleCollection, IRuleCollection<T>
         where T : Rule
     {
         private ConcurrentDictionary<string, T> _rules = new ConcurrentDictionary<string, T>();

@@ -118,6 +118,10 @@ namespace NDisconf.Client
         /// 是否强制下载更新，如果设为true，表示强制下载，否则将根据本地记录的最后更新时间来判断是否需要下载
         /// </summary>
         public bool ForcedDownload { get; set; } = false;
+        ///// <summary>
+        ///// 在无需下载时是否替换本地文件（如果基于IIS的服务如果更新后不断重启，可将此值设为false）
+        ///// </summary>
+        //public bool ReplaceWhenNoDownload { get; set; } = true;
         /// <summary>
         /// 根据FileIgnores来获取拆分后的忽略文件
         /// </summary>

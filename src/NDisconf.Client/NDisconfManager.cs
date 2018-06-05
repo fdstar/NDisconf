@@ -33,6 +33,7 @@ namespace NDisconf.Client
         private IFetcher _fetcher;
         private IPreservation[] _preservations;
         private static readonly Logger _logger = LogManager.GetLogger(LOGPREFIX + "NDisconfManager");
+        private readonly Dictionary<ConfigType, IRuleCollection<Rule>> _ruleDictionary;
         /// <summary>
         /// 单例
         /// </summary>
@@ -45,6 +46,7 @@ namespace NDisconf.Client
         /// 键值对更新规则
         /// </summary>
         public readonly RuleCollection<ItemRule> ItemRules = new RuleCollection<ItemRule>(c => new ItemRule(c));
+        
         private NDisconfManager()
         {
             _fallBackPolicy = Policy.Handle<Exception>().Fallback((c, ct) => { }, (e, c) =>
@@ -61,6 +63,11 @@ namespace NDisconf.Client
                 }
                 _logger.Error(e, tmp.ToString());
             });
+            _ruleDictionary = new Dictionary<ConfigType, IRuleCollection<Rule>>
+            {
+                { ConfigType.File, FileRules },
+                { ConfigType.Item, ItemRules },
+            };
         }
 #if NETSTANDARD2_0
         /// <summary>
@@ -130,8 +137,10 @@ namespace NDisconf.Client
             var filter = this.GetFilter<FetchFilter>();
             var ltimeFromServer = await this._fetcher.GetLastChangedTime(filter).ConfigureAwait(false);
             IDictionary<ConfigType, IDictionary<string, string>> configs;
+            var recoverFromLocal = false;
             if (this.NeedDownload(ltimeFromServer))
             {
+                recoverFromLocal = true;
                 configs = this._preservations.ToDictionary(k => k.ConfigType, v => v.GetFromLocal());
             }
             else
@@ -144,7 +153,7 @@ namespace NDisconf.Client
                 { ConfigType.File,this._setting.UpdateStrategy.FileIgnoreList},
                 { ConfigType.Item,this._setting.UpdateStrategy.ItemIgnoreList},
             }, configs);
-            await this.Refresh(filter, configs);
+            await this.Refresh(filter, configs, recoverFromLocal);
         }
         private bool NeedDownload(DateTime ltimeFromServer)
         {
@@ -188,19 +197,20 @@ namespace NDisconf.Client
                 }
             }
         }
-        private async Task Refresh(AppInfo info, IDictionary<ConfigType, IDictionary<string, string>> configs)
+        private async Task Refresh(AppInfo info, IDictionary<ConfigType, IDictionary<string, string>> configs, bool recoverFromLocal)
         {
             var builders = configs.Select(c =>
             {
                 var builder = new ZkTreeBuilder(info, c.Key, this._setting.ZookeeperBasePath, this._setting.ClientInfo.IgnoreCase);
-                var needRegister = c.Key == ConfigType.File;
+                IRuleCollection<Rule> rule = null;
+                if (this._ruleDictionary.ContainsKey(c.Key))
+                {
+                    rule = this._ruleDictionary[c.Key];
+                }
                 foreach (var kv in c.Value)
                 {
                     builder.GetOrAddZnodeName(kv.Key);
-                    if (needRegister)
-                    {
-                        this.FileRules.For(kv.Key);
-                    }
+                    rule?.For(kv.Key);
                     this._fallBackPolicy.Execute(() =>
                     {
                         this.TryNoticeChanged(c.Key, kv.Key, kv.Value);
@@ -252,17 +262,10 @@ namespace NDisconf.Client
         }
         private void TryNoticeChanged(ConfigType configType, string configName, string content)
         {
-            RuleCollection collection = null;
-            switch (configType)
+            if (this._ruleDictionary.ContainsKey(configType))
             {
-                case ConfigType.File:
-                    collection = this.FileRules;
-                    break;
-                case ConfigType.Item:
-                    collection = this.ItemRules;
-                    break;
-            };
-            collection?.TryNoticeChanged(configName, content);
+                this._ruleDictionary[configType].TryNoticeChanged(configName, content);
+            }
         }
 
         private T GetFilter<T>()
